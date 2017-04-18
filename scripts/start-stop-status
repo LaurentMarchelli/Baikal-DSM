@@ -20,6 +20,7 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #--------------------------------------------------------------------------------------------------
 # 12jan14 EB    First version for Baikal 0.2.6 "Flat package".
+# 05mar14 EB    DSM v5 support: set ownership of web files according to WebOwnerGroup
 #**************************************************************************************************
 
 #-------------------------------------------
@@ -30,6 +31,15 @@ PackageWebLink="/var/services/web/${SYNOPKG_PKGNAME}"   # clients should us this
 PackageAppDir="${PackageWebLink}.app"                   # where that app is actually stored
 
 LogFile=/var/log/${SYNOPKG_PKGNAME}.log
+
+#-------------------------------------------
+# Determine owner:group of the web files
+#-------------------------------------------
+WebOwnerGroup="nobody:nobody"   # default
+if [ ${SYNOPKG_DSM_VERSION_MAJOR} -gt 4 ]; then
+    # For DSM v5, owner:group is different
+    WebOwnerGroup="http:http"
+fi
 
 #-------------------------------------------------------------------------
 #   Log to permanent file, accessible via Package Center "Log" link
@@ -107,7 +117,10 @@ case "$1" in
             log "INFO: cannot enable the Web Admin interface (touch failed)"
         else
             # Change ownership, so Baikal can touch it again to extend grace time
-            chown nobody:nobody ${PackageAppDir}/Specific/ENABLE_ADMIN
+            chown ${WebOwnerGroup} ${PackageAppDir}/Specific/ENABLE_ADMIN
+            if [ $? -ne 0 ]; then
+                log "INFO: cannot enable the Web Admin interface (chown to \"${WebOwnerGroup}\" failed)"
+            fi
         fi
 
         exit 0    # LSB init okay

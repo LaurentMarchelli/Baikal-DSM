@@ -1,3 +1,16 @@
+0.2.7-001
+- Now based on Baikal "Flat package" 0.2.7, extract from its ChangeLog.md:
+  . New error detection: composer has not been installed  
+  . Corrected the http/https protocol detection  
+  . Auth more compatible with Synology software  
+  . Improved CardDAV and CalDAV auth compatibility with Windows Phones  
+  . Make calendar description optional  
+  . Make HTML5 shiv a local resource  
+  . Improve application security  
+  . Prevent PHP from parsing your MySQL credentials
+- Also touch ENABLE_INSTALL when upgrading (to start upgrade wizard)
+- For DSM v5 set ownership of web files to "http" instead of "nobody"
+- Tested with DSM 4.3-3827 (NOT with DSM v5)
 0.2.6-001
 - Initial version
 - Tested with DSM 4.3-3810 Update 3

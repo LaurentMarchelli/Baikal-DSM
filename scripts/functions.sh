@@ -20,6 +20,9 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #--------------------------------------------------------------------------------------------------
 # 12jan14 EB    First version for Baikal 0.2.6 "Flat package".
+# 05mar14 EB    DSM v5 support: set ownership of web files according to WebOwnerGroup
+#               preupgrade(): new version is not known yet, therefore only show current in logging
+#               postupgrade(): touch ENABLE_INSTALL to enable Upgrade Wizard
 #**************************************************************************************************
 
 #-------------------------------------------
@@ -34,6 +37,15 @@ MigrationDir=${SYNOPKG_PKGDEST}/../${SYNOPKG_PKGNAME}_data_migration
 
 # Please make sure LogFile is the same in start-stop-status and functions.sh
 LogFile=/var/log/${SYNOPKG_PKGNAME}.log
+
+#-------------------------------------------
+# Determine owner:group of the web files
+#-------------------------------------------
+WebOwnerGroup="nobody:nobody"   # default
+if [ ${SYNOPKG_DSM_VERSION_MAJOR} -gt 4 ]; then
+    # For DSM v5, owner:group is different
+    WebOwnerGroup="http:http"
+fi
 
 #--------------------------------------------------------------------------------------------------
 #   At command completion, Package Center will show the logged information in a popup
@@ -111,9 +123,10 @@ chmod_Data()
         if [ $? -ne 0 ]; then
             log "WARNING: chmod on data dir=\"${DataFullPath}\" has failed, you may need to change manually"
         fi
-        chown -R nobody:nobody ${DataFullPath}
+
+        chown -R ${WebOwnerGroup} ${DataFullPath}
         if [ $? -ne 0 ]; then
-            log "WARNING: chown on data dir=\"${DataFullPath}\" has failed, you may need to change manually"
+            log "WARNING: chown to \"${WebOwnerGroup}\" on data dir=\"${DataFullPath}\" has failed, you may need to change manually"
         fi
     fi
 }
@@ -143,8 +156,21 @@ postinst()
         exit 1
     fi
 
+    # Make sure files are there now 
+    if [ ! -d ${AppDir}/Core -o ! -f ${AppDir}/Core/Distrib.php ]; then
+        log "ERROR: failed to move Baikal files from \"${SYNOPKG_PKGDEST}/flat\" to AppDir=\"${AppDir}\""
+        exit 1
+    fi
+
+    chown -R ${WebOwnerGroup} ${AppDir}
+    if [ $? -ne 0 ]; then
+        log "ERROR: chown to \"${WebOwnerGroup}\" has failed on AppDir=\"${AppDir}\""
+        exit 1
+    fi
+
     if [ ${SYNOPKG_PKG_STATUS} != "UPGRADE" ]; then
         # Enable the Install Wizard for 1 hour after installing
+        log "DEBUG: touch path=\"${DataFullPath}/ENABLE_INSTALL\""
         touch ${DataFullPath}/ENABLE_INSTALL
         if [ $? -ne 0 ]; then
             log "WARNING: cannot enable the Install Wizard, path=\"${DataFullPath}/ENABLE_INSTALL\""
@@ -192,7 +218,7 @@ postuninst()
 #==================================================================================================
 preupgrade()
 {
-    log "INFO: performing upgrade of \"${SYNOPKG_PKGNAME}\" from \"${SYNOPKG_OLD_PKGVER}\" to \"${SYNOPKG_PKGVER}\""
+    log "INFO: performing upgrade of \"${SYNOPKG_PKGNAME}\", current version is \"${SYNOPKG_OLD_PKGVER}\""
     log "DEBUG: SYNOPKG_PKGDEST=${SYNOPKG_PKGDEST}"
     log "DEBUG: DataName=${DataName}"
     log "DEBUG: DataFullPath=${DataFullPath}"
@@ -247,6 +273,12 @@ postupgrade()
             mv ${DataFullPath}.org ${DataFullPath}
             exit 1
         fi
+
+        # Enable the Upgrade Wizard for 1 hour after upgrading
+        touch ${DataFullPath}/ENABLE_INSTALL
+        if [ $? -ne 0 ]; then
+            log "WARNING: cannot enable the Install Wizard, path=\"${DataFullPath}/ENABLE_INSTALL\""
+        fi
         chmod_Data
         
         # Cleanup migration data
@@ -264,5 +296,6 @@ postupgrade()
     fi
 
     log "INFO: upgrade to \"${SYNOPKG_PKGVER}\" finished"
+    echo "=> Please CONTINUE with Baikal web admin, by clicking Baikal icon in DSM Start Menu <=" >> ${SYNOPKG_TEMP_LOGFILE}
     exit 0
 }
