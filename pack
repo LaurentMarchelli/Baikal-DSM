@@ -1,0 +1,160 @@
+#!/bin/sh
+#********************************************************************
+#   Script to create Synology package for Baikal
+#   Copyright (C) 2014  Basalt
+#--------------------------------------------------------------------
+#   1) Create new dir on your Synology, any easy location will do
+#   2) Copy the tool files (including this one) to that folder
+#   3) Download "Flat package" from http://baikal-server.com/
+#   4) Unzip contents to the tool subdir "flat"
+#   5) Start SSH (eg PuTTY), login as root
+#   6) Goto (cd) the tool dir (see step 1)
+#   7) Run this script (./pack), the *.spk file will be made
+#   8) Use Package Center [Manual install] to install or upgrade
+#--------------------------------------------------------------------
+# 12jan14 EB    First version for Baikal 0.2.6 "Flat package".
+#********************************************************************
+
+#====================================================================
+# If called with (relative or absolute) path: goto subdir first
+#====================================================================
+cd "`dirname "$0"`"
+if [ $? != 0 ]; then
+    echo Fatal: cannot go to subdir 1>&2
+    exit 1
+fi
+
+#====================================================================
+# Check if basic package stuff is there
+#====================================================================
+if [ ! -d scripts ]; then
+    echo Fatal: scripts folder is missing ! 1>&2
+    exit 1
+fi
+
+if [ ! -f INFO ]; then
+    echo Fatal: INFO file is missing ! 1>&2
+    exit 1
+fi
+
+#====================================================================
+# Check if specific Baikal stuff is there
+#====================================================================
+if [ ! -f flat/index.php ]; then
+    echo "Fatal: Baikal file(s) missing !" 1>&2
+    exit 1
+fi
+
+if [ ! -d flat/Core -o ! -f flat/Core/Distrib.php ]; then
+    echo "Fatal: Baikal folder(s) missing !" 1>&2
+    exit 1
+fi
+
+#====================================================================
+# Read package name and version from INFO file
+#====================================================================
+PackageName=`/bin/get_key_value INFO package`
+if [ -z "$PackageName" ]; then
+    echo Fatal: cannot package name from INFO file 1>&2
+    exit 1
+fi
+
+PackageVersion=`/bin/get_key_value INFO version`
+if [ -z "$PackageVersion" ]; then
+    echo Fatal: cannot read package version from INFO file 1>&2
+    exit 1
+fi
+
+#====================================================================
+# Let's go
+#====================================================================
+echo Building version $PackageVersion of $PackageName ...
+
+rm -rf ./output
+mkdir ./output
+if [ $? -eq 0 ]; then
+    cd ./output
+    if [ $? -eq 0 ]; then
+        #-----------------------------
+        # Be sure we are in output
+        #-----------------------------
+        curdir=`pwd`
+        if  [ "`basename $curdir`" != "output" ]; then
+            echo Fatal: something is terribly wrong with output dir !!  1>&2
+            exit 1
+        fi
+
+        #-----------------------------
+        # Copy generic files
+        #-----------------------------
+        cp -p ../CHANGELOG .
+        cp -p ../INFO .
+        cp -p ../LICENSE .
+        cp -p ../PACKAGE_ICON*.PNG .
+
+        cp -pr ../scripts .
+
+        #-----------------------------
+        # Copy app specific files
+        #-----------------------------
+        echo Copying app files...
+        cp -pr ../ui .
+        cp -pr ../flat .
+
+        #-----------------------------
+        # Remove thumbnails, etc
+        #-----------------------------
+        echo Removing thumbnails...
+        find . -name @eaDir -exec rm -rf {} \; >/dev/null 2>&1 
+        find . -name Thumbs.db -exec rm -rf {} \;  >/dev/null 2>&1 
+
+        #---------------------------
+        # Change ownership of all
+        #---------------------------
+        chown -R nobody.nobody .
+        chmod -R 755 .
+
+        #---------------------------
+        # Pack app specific files
+        # and remove their copy
+        #---------------------------
+        echo Zipping app files...
+        tar -czf package.tgz ui flat
+        rm -rf ./ui ./flat
+
+        chown nobody.nobody package.tgz
+        chmod -R 755 package.tgz
+
+        #---------------------------
+        # Write checksum in INFO
+        #
+        # Must be done in /tmp
+        # because of php restrictions
+        # (open_basedir)
+        #---------------------------
+        echo Calculating checksum...
+        tmpfile=/tmp/$PackageName_$RANDOM.tmp
+        if [ -e $tmpfile ]; then
+            echo "Fatal: tmp file \"$tmpfile\" already exists !"
+            exit 1
+        fi
+        cp package.tgz $tmpfile
+        if [ $? -ne 0 ]; then
+            echo "Fatal: cannot copy package.tgz to \"$tmpfile\" !"
+            exit 1
+        fi
+        sum=`../md5_file.php $tmpfile`
+        rm $tmpfile
+        sed -i s/^checksum=.*$/checksum=$sum/g INFO
+
+        #-----------------------------
+        # Pack it all
+        #---------------------------
+        echo Creating package...
+        tar -cvf ../$PackageName-$PackageVersion.spk *
+        if [ $? -eq 0 ]; then
+            echo
+            echo "Created \"$PackageName-$PackageVersion.spk\""
+        fi
+    fi
+fi

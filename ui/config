@@ -1,0 +1,14 @@
+{
+    ".url": {
+        "SYNO.SDS._ThirdParty.App.Baikal": {
+            "type": "url",
+            "allUsers": false,
+            "title": "Baikal Contacts and Calendar",
+            "desc": "Baikal administration for Contacts (CardDAV) and Calendar (CalDAV)",
+            "icon": "images/baikal_{0}.png",
+            "protocol": "http",
+            "url": "/baikal/admin/",
+            "port": "80"
+        }
+    }
+}
