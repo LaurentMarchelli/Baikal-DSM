@@ -24,7 +24,7 @@ date_default_timezone_set('UTC');
  *
  * This can be for example the root / or a complete path to your server script.
  */
-$baseUri = '/';
+// $baseUri = '/';
 
 /**
  * Database
@@ -33,7 +33,7 @@ $baseUri = '/';
  * concurrency.
  */
 $pdo = new \PDO('sqlite:data/db.sqlite');
-$pdo->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 /**
  * Mapping PHP errors to exceptions.
@@ -42,7 +42,7 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
  * E_NOTICE or anything appears in your code, this allows SabreDAV to intercept
  * the issue and send a proper response back to the client (HTTP/1.1 500).
  */
-function exception_error_handler($errno, $errstr, $errfile, $errline ) {
+function exception_error_handler($errno, $errstr, $errfile, $errline) {
     throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
 }
 set_error_handler("exception_error_handler");
@@ -67,25 +67,26 @@ $caldavBackend    = new \Sabre\CalDAV\Backend\PDO($pdo);
  * Basically this is an array which contains the 'top-level' directories in the
  * WebDAV server.
  */
-$nodes = array(
+$nodes = [
     // /principals
     new \Sabre\CalDAV\Principal\Collection($principalBackend),
     // /calendars
-    new \Sabre\CalDAV\CalendarRootNode($principalBackend, $caldavBackend),
+    new \Sabre\CalDAV\CalendarRoot($principalBackend, $caldavBackend),
     // /addressbook
     new \Sabre\CardDAV\AddressBookRoot($principalBackend, $carddavBackend),
-);
+];
 
 // The object tree needs in turn to be passed to the server class
 $server = new \Sabre\DAV\Server($nodes);
-$server->setBaseUri($baseUri);
+if (isset($baseUri)) $server->setBaseUri($baseUri);
 
 // Plugins
-$server->addPlugin(new \Sabre\DAV\Auth\Plugin($authBackend,'SabreDAV'));
+$server->addPlugin(new \Sabre\DAV\Auth\Plugin($authBackend));
 $server->addPlugin(new \Sabre\DAV\Browser\Plugin());
 $server->addPlugin(new \Sabre\CalDAV\Plugin());
 $server->addPlugin(new \Sabre\CardDAV\Plugin());
 $server->addPlugin(new \Sabre\DAVACL\Plugin());
+$server->addPlugin(new \Sabre\DAV\Sync\Plugin());
 
 // And off we go!
 $server->exec();
