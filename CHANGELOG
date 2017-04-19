@@ -1,6 +1,15 @@
+0.4.6-001
+- Now based on Baikal 0.4.6
+- Add DSM 6.1 support with Ngnix
+- Add Ngnix configuration file to natively support MacOSX Contacts and Calendars On OSX Capitan
+- Now HTTP port is fixed to 8008 : CardDav
+- Synology CardDav need to be uninstalled
+- Baikal admin is now lauched at the end of the installation.
+
 0.2.7-002
 - DSM 5 workaround in Core/Frameworks/Flake/Framework.php
 - Added 256x256 icon
+
 0.2.7-001
 - Now based on Baikal "Flat package" 0.2.7, extract from its ChangeLog.md:
   . New error detection: composer has not been installed  
@@ -14,6 +23,7 @@
 - Also touch ENABLE_INSTALL when upgrading (to start upgrade wizard)
 - For DSM v5 set ownership of web files to "http" instead of "nobody"
 - Tested with DSM 4.3-3827 (NOT with DSM v5)
+
 0.2.6-001
 - Initial version
 - Tested with DSM 4.3-3810 Update 3

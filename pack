@@ -40,7 +40,7 @@ fi
 #====================================================================
 # Check if specific Baikal stuff is there
 #====================================================================
-if [ ! -f flat/index.php ]; then
+if [ ! -f flat/html/index.php ]; then
     echo "Fatal: Baikal file(s) missing !" 1>&2
     exit 1
 fi

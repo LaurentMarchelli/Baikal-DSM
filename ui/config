@@ -7,8 +7,8 @@
             "desc": "Baikal administration for Contacts (CardDAV) and Calendar (CalDAV)",
             "icon": "images/baikal_{0}.png",
             "protocol": "http",
-            "url": "/baikal/admin/",
-            "port": "80"
+            "url": "/admin/",
+            "port": "8008"
         }
     }
 }
