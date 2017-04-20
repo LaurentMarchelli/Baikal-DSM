@@ -23,8 +23,7 @@
 #
 #  This copyright notice MUST APPEAR in all copies of the script!
 #################################################################
-# 19may14 EB    endsWith() changed, do not use substr_compare() anymore
-#################################################################
+
 namespace Flake;
 
 class Framework extends \Flake\Core\Framework {
@@ -82,10 +81,7 @@ class Framework extends \Flake\Core\Framework {
 	public static function endsWith($sString, $sTest) {
 		$iTestLen = strlen($sTest);
 		if ($iTestLen > strlen($sString)) return false;
-		//@@@ Original line: return substr_compare($sString, $sTest, -$iTestLen) === 0;
-        //@@@ substr_compare() seems buggy when no length is specified
-        //@@@ Next line should work better:
-        return substr($sString, -$iTestLen) == $sTest;
+		return substr_compare($sString, $sTest, -$iTestLen) === 0;
 	}
 
 	public static function bootstrap() {

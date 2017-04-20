@@ -1,6 +1,6 @@
 package="baikal"
 displayname="Baikal"
-version="0.2.7-001"
+version="0.2.7-002"
 arch="noarch"
 firmware="4.2-3160"
 startable="yes"

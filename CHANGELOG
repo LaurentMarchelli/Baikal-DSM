@@ -1,3 +1,6 @@
+0.2.7-002
+- DSM 5 workaround in Core/Frameworks/Flake/Framework.php
+- Added 256x256 icon
 0.2.7-001
 - Now based on Baikal "Flat package" 0.2.7, extract from its ChangeLog.md:
   . New error detection: composer has not been installed  
