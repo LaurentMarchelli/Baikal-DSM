@@ -4,7 +4,7 @@
 - Add Ngnix configuration file to natively support MacOSX Contacts and Calendars On OSX Capitan
 - Now HTTP port is fixed to 8008 : CardDav
 - Synology CardDav need to be uninstalled
-- Baikal admin is now lauched at the end of the installation.
+- Removed DSM 5.x & DSM 4.x support
 
 0.2.7-002
 - DSM 5 workaround in Core/Frameworks/Flake/Framework.php

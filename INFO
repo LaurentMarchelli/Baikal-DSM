@@ -1,25 +1,21 @@
 package="baikal"
 displayname="Baikal"
 version="0.4.6-001"
-firmware="4.2-3160"
+firmware="6.1-14715"
+os_min_ver="6.1-14715"
 description="Baikal is a lightweight server that offers global and synchronized access to your calendars and address books over CalDAV and CardDAV. If you like this package, please consider making a small donation to the developer Jerome Schneider. === NOTE === Elaborate manual is available as PDF on the download site, strongly recommended!"
 arch="noarch"
-
 maintainer="Jerome Schneider"
+
 maintainer_url="http://baikal-server.com/"
 distributor="Laurent Marchelli"
 distributor_url ="https://github.com/LaurentMarchelli/Baikal-DSM"
 checksum=will automatically be calculated and inserted here
-
 adminport="8008"
 adminurl="/admin/"
 adminprotocol="http"
-dsmuidir=ui
+dsmuidir="ui"
 dsmappname="SYNO.SDS._ThirdParty.App.Baikal"
-checkport="no"
-startable="yes"
-instuninst_restart_services="apache-web"
-install_dep_services="apache-web"
-start_dep_services="apache-web"
-support_conf_folder="yes"
+install_dep_packages="WebStation:PHP5.6"
+startstop_restart_services="nginx"
 thirdparty="yes"

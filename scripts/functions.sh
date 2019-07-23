@@ -3,8 +3,8 @@
 #   Functions for the "Baikal Server" scripts, to install as package on Synology system
 #   Copyright (C) 2014  Basalt
 #--------------------------------------------------------------------------------------------------
-#   Baïkal Server, a lightweight CalDAV and CardDAV server.
-#   Copyright (C) 2012  Jérôme Schneider
+#   BaÃ¯kal Server, a lightweight CalDAV and CardDAV server.
+#   Copyright (C) 2012  JÃ©rÃ´me Schneider
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -60,12 +60,20 @@ fi
 log()   # argument $1=text to log
 {
     local prefix=`echo $1|sed "s/:.*$//g"`
-    if [ "${prefix}" != "DEBUG" ]; then
-        if [ "${prefix}" != "INFO" ]; then
-            echo "$1" >> ${SYNOPKG_TEMP_LOGFILE}
-        fi
-        echo "$(date "+%d-%b-%y %H:%M:%S") ${SYNOPKG_PKG_STATUS},$1" >> ${LogFile}
+    # Easier to enable debug mode
+    [ "${prefix}" == "DEBUG" ] && return 0
+    if [[ "${prefix}" != "DEBUG" ]] &&Â [[ "${prefix}" != "INFO" ]]; then
+        echo "$1" >> ${SYNOPKG_TEMP_LOGFILE}
     fi
+    echo -e "$(date "+%d-%b-%y %H:%M:%S") ${SYNOPKG_PKG_STATUS},$1" >> ${LogFile}
+}
+
+dump_var()
+{
+    local var_name
+    for var_name in ${!SYNOPKG_*}; do
+      echo -e "${var_name}=\x27${!var_name}\x27"
+    done
 }
 
 #--------------------------------------------------------------------------------------------------
@@ -137,7 +145,7 @@ chmod_Data()
 preinst()
 {
     log "INFO: performing installation of \"${SYNOPKG_PKGNAME}\" version \"${SYNOPKG_PKGVER}\""
-    remove_AppDir
+    log "DEBUG: Dumping Synology variables : \n$(dump_var | sort)"
     exit 0
 }
 
@@ -147,7 +155,8 @@ postinst()
     log "DEBUG: SYNOPKG_PKGDEST=${SYNOPKG_PKGDEST}"
     log "DEBUG: DataName=${DataName}"
     log "DEBUG: DataFullPath=${DataFullPath}"
-    
+    log "DEBUG: Dumping Synology variables : \n$(dump_var | sort)"
+
     # Install package into Web space
     # (for security reasons, linking to ${SYNOPKG_PKGDEST} does not work)
     mv ${SYNOPKG_PKGDEST}/flat ${AppDir}
@@ -179,6 +188,17 @@ postinst()
     # In that case you will have to uninstall/install
     fi
     
+    # Create required configuration links
+    local retval=0
+    pushd "/var/packages/baikal/conf/" || retval=${?}
+    if [ ${retval} -eq 0 ]; then
+      find etc/* -name *.conf -exec ln -s ${PWD}/{} /{} \; || retval=${?}
+      popd
+    fi
+    if [ ${retval} -ne 0 ]; then
+        log "ERROR: failed to create configuration links"
+        exit 1
+    fi
     log "INFO: installation of \"${SYNOPKG_PKGVER}\" finished"
     exit 0
 }
@@ -189,6 +209,18 @@ postinst()
 preuninst()
 {
     log "DEBUG: uninstall started"
+
+    # Remove configuration links
+    local retval=0
+    pushd "/var/packages/baikal/conf/" || retval=${?}
+    if [ ${retval} -eq 0 ]; then
+      find etc/* -name *.conf -exec rm /{} \; || retval=${?}
+      popd
+    fi
+    if [ ${retval} -ne 0 ]; then
+        log "ERROR: failed to remove configuration links"
+        exit 1
+    fi
     exit 0
 }
 

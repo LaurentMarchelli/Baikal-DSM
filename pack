@@ -27,6 +27,11 @@ fi
 #====================================================================
 # Check if basic package stuff is there
 #====================================================================
+if [ ! -d conf ]; then
+    echo Fatal: conf folder is missing ! 1>&2
+    exit 1
+fi
+
 if [ ! -d scripts ]; then
     echo Fatal: scripts folder is missing ! 1>&2
     exit 1
@@ -40,6 +45,11 @@ fi
 #====================================================================
 # Check if specific Baikal stuff is there
 #====================================================================
+if [ ! -f conf/etc/nginx/sites-enabled/baikal.conf ]; then
+    echo "Fatal: Baikal file(s) missing !" 1>&2
+    exit 1
+fi
+
 if [ ! -f flat/html/index.php ]; then
     echo "Fatal: Baikal file(s) missing !" 1>&2
     exit 1
@@ -98,8 +108,9 @@ if [ $? -eq 0 ]; then
         # Copy app specific files
         #-----------------------------
         echo Copying app files...
-        cp -pr ../ui .
+        cp -pr ../conf .
         cp -pr ../flat .
+        cp -pr ../ui .
 
         #-----------------------------
         # Remove thumbnails, etc
@@ -112,7 +123,7 @@ if [ $? -eq 0 ]; then
         # Change ownership of all
         #---------------------------
         chown -R nobody.nobody .
-        chmod -R 755 .
+#         chmod -R 755 .
 
         #---------------------------
         # Pack app specific files
