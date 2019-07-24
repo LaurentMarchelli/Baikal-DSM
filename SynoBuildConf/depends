@@ -1,0 +1,4 @@
+# Copyright (c) 2000-2016 Synology Inc. All rights reserved.
+
+[default]
+all="6.0"   # toolkit environment version of specific platform. (all platform use 6.0 toolkit environment)

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+echo 'Nothing to build, so consider it as successfull ;-)'
+exit 0
