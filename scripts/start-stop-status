@@ -94,6 +94,17 @@ case "$1" in
             log "INFO: system is booting, start \"${SYNOPKG_PKGNAME}\", version=\"${SYNOPKG_PKGVER}\""
         fi
 
+        # Create required configuration files
+        pushd "/var/packages/baikal/conf/" >/dev/null; retval=${?}
+        if [ ${retval} -eq 0 ]; then
+            find etc/* -name *.conf -exec cp ${PWD}/{} /usr/local/{} \; || retval=${?}
+            popd >/dev/null
+        fi
+        if [ ${retval} -ne 0 ]; then
+            log "ERROR: failed to create configuration files"
+            exit 7    # LSB init error:  Not running
+        fi
+
         #--------------------------------------------------
         # Make CardDAV, CalDAV and Web Admin available
         #--------------------------------------------------
@@ -102,12 +113,6 @@ case "$1" in
             exit 7    # LSB init error:  Not running
         fi
         
-        ln -s ${PackageAppDir} ${PackageWebLink}
-        if [ $? -ne 0 ]; then
-            log "ERROR: cannot enable web files for package=\"${SYNOPKG_PKGNAME}\""
-            exit 7    # LSB init error:  Not running
-        fi
-
         #--------------------------------------------------
         # Enable the Web Admin interface for 1 hour
         # (or permanently, depending on your settings)
@@ -123,6 +128,12 @@ case "$1" in
             fi
         fi
 
+        # Create status link
+        ln -sf ${PackageAppDir} ${PackageWebLink}
+        if [ $? -ne 0 ]; then
+            log "ERROR: cannot enable web files for package=\"${SYNOPKG_PKGNAME}\""
+            exit 7    # LSB init error:  Not running
+        fi
         exit 0    # LSB init okay
         ;;
         
@@ -142,13 +153,18 @@ case "$1" in
         # Disable CardDAV, CalDAV and Web Admin
         # -h = test for symbolic link
         #--------------------------------------------------
-        if [ -L ${PackageWebLink} ]; then
-            rm ${PackageWebLink} 
-            if [ $? -ne 0 ]; then
-                log "ERROR: cannot disable web files for package=\"${SYNOPKG_PKGNAME}\""
-                exit 7    # LSB init error:  Not running
-            fi
+        # Remove configuration files
+        pushd "/var/packages/baikal/conf/" >/dev/null; retval=${?}
+        if [ ${retval} -eq 0 ]; then
+            find etc/* -name *.conf -exec rm -f /usr/local/{} \; || retval=${?}
+            popd >/dev/null
         fi
+        if [ ${retval} -ne 0 ]; then
+            log "ERROR: failed to remove configuration files"
+            exit 1
+        fi
+        # Remove status link
+        rm -f ${PackageWebLink}
         exit 0    # LSB init okay
         ;;
         

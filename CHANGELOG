@@ -1,3 +1,10 @@
+0.4.6-002
+- Bug fixed : DSM cannot start up normally because it ran into a problem. Please contact the Synology support team for help.
+(Too many symbolic link level for nginx)
+- Install passed with DSM 6.2.3-25426-2 on DS211 & DS718+
+- Update from 0.4.6-001 passed with DSM 6.2.3-25426-2 on DS211 & DS718+
+- Legacy documentation added into ./docs folder
+
 0.4.6-001
 - Now based on Baikal 0.4.6
 - Add DSM 6.1 support with Ngnix
