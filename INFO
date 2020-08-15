@@ -1,6 +1,6 @@
 package="baikal"
 displayname="Baikal"
-version="0.4.6-001"
+version="0.4.6-002"
 firmware="6.1-14715"
 os_min_ver="6.1-14715"
 description="Baikal is a lightweight server that offers global and synchronized access to your calendars and address books over CalDAV and CardDAV. If you like this package, please consider making a small donation to the developer Jerome Schneider. === NOTE === Elaborate manual is available as PDF on the download site, strongly recommended!"

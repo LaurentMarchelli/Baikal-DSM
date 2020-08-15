@@ -62,7 +62,7 @@ log()   # argument $1=text to log
     local prefix=`echo $1|sed "s/:.*$//g"`
     # Easier to enable debug mode
     [ "${prefix}" == "DEBUG" ] && return 0
-    if [[ "${prefix}" != "DEBUG" ]] && [[ "${prefix}" != "INFO" ]]; then
+    if [ "${prefix}" != "DEBUG" ] && [ "${prefix}" != "INFO" ]; then
         echo "$1" >> ${SYNOPKG_TEMP_LOGFILE}
     fi
     echo -e "$(date "+%d-%b-%y %H:%M:%S") ${SYNOPKG_PKG_STATUS},$1" >> ${LogFile}
@@ -188,17 +188,6 @@ postinst()
     # In that case you will have to uninstall/install
     fi
     
-    # Create required configuration links
-    local retval=0
-    pushd "/var/packages/baikal/conf/" || retval=${?}
-    if [ ${retval} -eq 0 ]; then
-      find etc/* -name *.conf -exec ln -s ${PWD}/{} /{} \; || retval=${?}
-      popd
-    fi
-    if [ ${retval} -ne 0 ]; then
-        log "ERROR: failed to create configuration links"
-        exit 1
-    fi
     log "INFO: installation of \"${SYNOPKG_PKGVER}\" finished"
     exit 0
 }
@@ -209,18 +198,7 @@ postinst()
 preuninst()
 {
     log "DEBUG: uninstall started"
-
-    # Remove configuration links
-    local retval=0
-    pushd "/var/packages/baikal/conf/" || retval=${?}
-    if [ ${retval} -eq 0 ]; then
-      find etc/* -name *.conf -exec rm /{} \; || retval=${?}
-      popd
-    fi
-    if [ ${retval} -ne 0 ]; then
-        log "ERROR: failed to remove configuration links"
-        exit 1
-    fi
+    log "DEBUG: Dumping Synology variables : \n$(dump_var | sort)"
     exit 0
 }
 
