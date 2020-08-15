@@ -104,7 +104,7 @@ remove_orgData()
     log "DEBUG: remove original data=\"${DataFullPath}.org\""
     
     if [ -d "${DataFullPath}.org" ]; then
-        if  [ -z "${DataFullPath}"] ||
+        if  [ -z "${DataFullPath}" ] ||
             [ "`basename "${DataFullPath}"`" != "${DataName}" ]; then
             log "ERROR: something is terribly wrong with original data dir=\"${DataFullPath}.org\""
             exit 1
